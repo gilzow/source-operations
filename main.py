@@ -1,2 +1,5 @@
 #!/usr/bin/env python
-print("Hello from python")
+import os
+from autoupdate import main as autoupdatemain
+
+autoupdatemain()
