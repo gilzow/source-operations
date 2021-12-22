@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 import os
-from autoupdate import main as autoupdatemain
+import sys
+print("hello from main.py!")
+if 1 < len(sys.argv):
+    print("You said {}".format(sys.argv[1]))
+#from autoupdate import main as autoupdatemain
 
-autoupdatemain()
+#autoupdatemain()

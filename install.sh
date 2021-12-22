@@ -1,3 +1,9 @@
 #!/usr/bin/env bash
+
 git clone https://github.com/gilzow/source-operations.git
-python source-operations/main.py
+
+function sourceOp() {
+  python "${PWD}/main.py" "$@"
+}
+
+#python source-operations/main.py
