@@ -1,9 +1,16 @@
 #!/usr/bin/env python
 import os
 import sys
-print("hello from main.py!")
-if 1 < len(sys.argv):
-    print("You said {}".format(sys.argv[1]))
-#from autoupdate import main as autoupdatemain
+from autoupdate import main as autoupdatemain
 
-#autoupdatemain()
+
+def main():
+    if 2 > len(sys.argv):
+        return False
+
+    if "autoupdate" == sys.argv[1]:
+        autoupdatemain()
+
+
+if __name__ == '__main__':
+    main()
