@@ -81,11 +81,10 @@ def main():
         procStatus = subprocess.Popen('git status --porcelain=1', shell=True, cwd=appPath, stdout=subprocess.PIPE,
                                       stderr=subprocess.PIPE)
         output, error = procStatus.communicate()
-        if 0 != procStatus.returncode:
-            return outputError('git status', error)
-        elif "" == output:
-            # no updates so nothing to add
-            return
+        if not output:
+            logging.info("No updates available, nothing to commit. Exiting...")
+            # no updates so nothing to add, not a failure, but we are done
+            return True
 
         # one more, just need to add the file
         output = error = None
