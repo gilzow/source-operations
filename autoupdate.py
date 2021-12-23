@@ -83,7 +83,7 @@ def main():
                                       stderr=subprocess.PIPE)
         output, error = procStatus.communicate()
         logging.debug("output from git status: {}".format(output))
-        if not output:
+        if not output or action['lock'] not in output:
             logging.info("No updates available, nothing to commit. Exiting...")
             # no updates so nothing to add, not a failure, but we are done
             return True
