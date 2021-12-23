@@ -73,7 +73,7 @@ def main():
         procUpdate = subprocess.Popen(action['command'], shell=True, cwd=action['path'], stdout=subprocess.PIPE,
                                       stderr=subprocess.PIPE)
         output, error = procUpdate.communicate()
-        logging.debug("Output from {}: {}".format(action['command'],output))
+
         if 0 != procUpdate.returncode:
             return outputError(action['command'], error)
         # now let's see if we have updates
@@ -82,7 +82,7 @@ def main():
         procStatus = subprocess.Popen('git status --porcelain=1', shell=True, cwd=appPath, stdout=subprocess.PIPE,
                                       stderr=subprocess.PIPE)
         output, error = procStatus.communicate()
-        logging.debug("output from git status: {}".format(output))
+
         if not output or action['lock'] not in output:
             logging.info("No updates available, nothing to commit. Exiting...")
             # no updates so nothing to add, not a failure, but we are done
