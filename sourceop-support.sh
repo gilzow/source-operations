@@ -89,6 +89,11 @@ function createOrSyncUpdateBranch() {
     BRANCH_NAME="$1"
     BRANCH_FROM="$2"
 
+    # how many are we allowed to have
+    #platform p:info subscription.environments
+
+    # how many do we have active
+    # platform e:list --type=development,staging --no-inactive --pipe
     # kill two birds with one stone here: if it doesn't exist, then we'll get an error and know we need to create it. If
     # it exists, then we'll know if we need to sync it
     commitsBehind=$(platform environment:info merge_info.commits_behind -e "${BRANCH_NAME}")
@@ -127,7 +132,7 @@ function createBranch() {
 
 function syncBranch() {
   updateBranch="${1}"
-  productionBranch="${2}"      
+  productionBranch="${2}"
 }
 
 function runSourceOperation() {
