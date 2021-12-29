@@ -22,13 +22,19 @@ function checkForPSHToken() {
 }
 
 # Ensures the psh cli tool is installed and available
-# @return void
+# @return bool exit status
 function ensureCliIsInstalled() {
-    if which platform; then
-        echo "Cli is already installed"
+    which platform
+    result=$?
+
+    if (( 0 != result )); then
+      event="Checking for the Platform.sh CLI tool"
+      message="The Platform.sh CLI tool is not installed. Please add its installation to the build section of your"
+      message="${message} .platform.app.yaml. See https://github.com/platformsh/platformsh-cli#installation for more"
+      message="${message} information"
+      logFatalError "${event}" "${message}"
+      exit 1
     else
-        # @todo should we follow up afterwards and make sure it installs correctly?
-        echo "Cli not installed, installing..."
-        curl -sS https://platform.sh/cli/installer | php
+      printf "The Platform.sh CLI tool is installed.\n"
     fi
 }
