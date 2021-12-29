@@ -4,7 +4,7 @@
 # from a boolean exit status
 
 #source our common functions
-. "common.sh"
+. "${BASH_SOURCE%/*}/common.sh"
 
 function trigger_source_op() {
     echo "Beginning set up to perform the update..."
