@@ -31,7 +31,7 @@ case ${perform} in
     (trigger_source_op) || exit 1
 
     #now we're ready to start the PR process
-    . "{$dirSourceOps}/ghPR.sh"
+    . "${dirSourceOps}/ghPR.sh"
 
     ;;
 
