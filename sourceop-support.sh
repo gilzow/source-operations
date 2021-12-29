@@ -3,7 +3,7 @@
 # in case (or when) we convert this to another language, it may help to have the indicated return when it is different
 # from a boolean exit status
 
-# we can probably get rid of this one
+
 function trigger_source_op() {
     echo "Beginning set up to perform the update..."
     # Things we need in order to be able to perform the operation
