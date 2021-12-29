@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # bash <(curl -fsS https://raw.githubusercontent.com/gilzow/source-operations/main/test.sh) foobar
+# bash <(curl -fsS https://raw.githubusercontent.com/gilzow/source-operations/auto-pr/setup.sh) autoprsourceop
 # https://github.com/gilzow/source-operations.git
 
 gitSourceOps="https://github.com/gilzow/source-operations.git"
@@ -10,10 +11,11 @@ dirSourceOps="${tmpDir}/source-operations"
 git -C "${dirSourceOps}" status
 gitCheck=$?
 
+# we dont have the repo cloned so let's clone it
 if (( 0 != gitCheck )) || [[ ! -d "${dirSourceOps}" ]]; then
-  git -C "${tmpDir}" "${gitSourceOps}"
+  git -C "${tmpDir}" clone "${gitSourceOps}"
 else
-  #let's make sure we're up-to-date
+  # we have it so let's make sure we're up-to-date
   git -C "${dirSourceOps}" pull origin
 fi
 
