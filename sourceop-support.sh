@@ -7,7 +7,7 @@
 . "${BASH_SOURCE%/*}/common.sh"
 
 function trigger_source_op() {
-    echo "Beginning set up to perform the update..."
+    printf "Beginning set up to perform the update...\n"
     # Things we need in order to be able to perform the operation
     (checkForPSHToken) || exit $?
     (ensureCliIsInstalled) || exit $?
@@ -30,7 +30,7 @@ function trigger_source_op() {
       deactivateUpdateBranch "${updateBranch}"
     fi
 
-    echo "Auto update of ${updateBranch} complete."
+    printf "Auto update of %s complete.\n" "${updateBranch}"
 }
 
 # Gets the production branch name
@@ -119,7 +119,7 @@ function prepareUpdateBranch() {
 # @return void
 function activateBranch() {
     ENV_NAME="$1"
-    echo "Activating branch '${ENV_NAME}'..."
+    printf "Activating branch '%s'..." "${ENV_NAME}"
     platform environment:activate "${ENV_NAME}" --wait --yes
     result=$?
     if (( 0 != result )); then
@@ -129,7 +129,7 @@ function activateBranch() {
       logFatalError "${event}" "${message}"
       exit 1
     fi
-    echo "Environment activated"
+    printf " Environment activated.\n"
 }
 
 # Creates the update branch so we can run source operations against it
@@ -139,7 +139,7 @@ function activateBranch() {
 function createBranch() {
   updateBranch="${1}"
   productionBranch="${2}"
-  echo "Creating environment ${updateBranch}..."
+  printf "Creating environment %s..." "${updateBranch}"
   platform e:branch "${updateBranch}" "${productionBranch}" --no-clone-parent --force
   result=$?
   if (( 0 != result )); then
@@ -150,7 +150,7 @@ function createBranch() {
     exit 1
   fi
 
-  echo "Environment created."
+  printf " Environment created.\n"
 }
 
 # Make sure the update branch is a direct child of production
@@ -180,7 +180,7 @@ function syncBranch() {
   updateBranch="${1}"
   productionBranch="${2}"
 
-  echo "Syncing branch ${updateBranch} with ${productionBranch}"
+  printf "Syncing branch %s with %s..." "${updateBranch}" "${productionBranch}"
 
   platform sync -e "${updateBranch}" --yes --wait code
   result=$?
@@ -192,7 +192,7 @@ function syncBranch() {
     exit 1
   fi
 
-  echo "Syncing complete."
+  printf " Syncing complete.\n"
 }
 
 # Sets the environment back to inactive status (ie Deletes the *environment* but not the git branch)
@@ -201,7 +201,7 @@ function syncBranch() {
 # @return exit status
 function deactivateUpdateBranch() {
   updateBranch="${1}"
-  echo "Deactivating environment ${updateBranch}"
+  printf "Deactivating environment %s\n" "${updateBranch}"
   platform e:delete "${updateBranch}" --no-delete-branch --no-wait --yes
 }
 
@@ -212,9 +212,9 @@ function deactivateUpdateBranch() {
 function runSourceOperation() {
     SOURCEOP_NAME="$1"
     ENV_NAME="$2"
-    echo "Running source operation '${SOURCEOP_NAME}' on '${ENV_NAME}'..."
+    printf "Running source operation '%s' on '%s'..." "${SOURCEOP_NAME}" "${ENV_NAME}"
     if platform source-operation:run "${SOURCEOP_NAME}" --environment "${ENV_NAME}" --wait ; then
-        echo "Source op finished"
+        printf " Source op finished!\n"
     else
         event="Running source operation ${SOURCEOP_NAME}"
         message="An error occurred while trying to run the source operation ${SOURCEOP_NAME}. Please see the activity log"
