@@ -122,7 +122,7 @@ function prepareUpdateBranch() {
 # @return void
 function activateBranch() {
     ENV_NAME="$1"
-    printf "Activating branch '%s'..." "${ENV_NAME}"
+    #printf "Activating branch '%s'..." "${ENV_NAME}"
     platform environment:activate "${ENV_NAME}" --wait --yes
     result=$?
     if (( 0 != result )); then
@@ -132,7 +132,7 @@ function activateBranch() {
       logFatalError "${event}" "${message}"
       exit 1
     fi
-    printf " Environment activated.\n"
+    #printf " Environment activated.\n"
 }
 
 # Creates the update branch so we can run source operations against it
@@ -142,7 +142,7 @@ function activateBranch() {
 function createBranch() {
   updateBranch="${1}"
   productionBranch="${2}"
-  printf "Creating environment %s..." "${updateBranch}"
+  #printf "Creating environment %s..." "${updateBranch}"
   platform e:branch "${updateBranch}" "${productionBranch}" --no-clone-parent --force
   result=$?
   if (( 0 != result )); then
@@ -153,7 +153,7 @@ function createBranch() {
     exit 1
   fi
 
-  printf " Environment created.\n"
+  #printf " Environment created.\n"
 }
 
 # Make sure the update branch is a direct child of production
@@ -183,7 +183,7 @@ function syncBranch() {
   updateBranch="${1}"
   productionBranch="${2}"
 
-  printf "Syncing branch %s with %s..." "${updateBranch}" "${productionBranch}"
+  #printf "Syncing branch %s with %s..." "${updateBranch}" "${productionBranch}"
 
   platform sync -e "${updateBranch}" --yes --wait code
   result=$?
@@ -195,7 +195,7 @@ function syncBranch() {
     exit 1
   fi
 
-  printf " Syncing complete.\n"
+  #printf " Syncing complete.\n"
 }
 
 # Sets the environment back to inactive status (ie Deletes the *environment* but not the git branch)
