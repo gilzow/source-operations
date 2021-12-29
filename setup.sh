@@ -24,7 +24,7 @@ perform=${1:-'nothing'}
 case ${perform} in
 
   autoprsourceop)
-    printf "Beginning automated pull request after auto-update source operation..."
+    echo "Beginning the automated pull request for auto-update source operation task..."
     # grab our sourceop-support file, source it, then fire off the main component
     . "${dirSourceOps}/sourceop-support.sh"
     # run the set up and source operation
@@ -35,8 +35,13 @@ case ${perform} in
 
     ;;
 
-  foobar)
-    echo "you want me to bar foo"
+  autoupdatesourceop)
+    echo "Beginning automated source operation update process..."
+    # grab our sourceop-support file, source it, then fire off the main component
+    . "${dirSourceOps}/sourceop-support.sh"
+    # run the set up and source operation
+    (trigger_source_op) || exit 1
+    echo "Complete. You can now test the updated branch."
     ;;
 
   nothing)
@@ -48,3 +53,4 @@ case ${perform} in
     ;;
 esac
 
+# @todo maybe we should move
