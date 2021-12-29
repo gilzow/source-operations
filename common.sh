@@ -7,7 +7,7 @@
 function logFatalError() {
   event="${1:-no event specificied}"
   message="${2:-no message provided}"
-  printf "\nFatal error encountered during %s\n%s\n" "${event}" "${message}. Exiting.\n"
+  printf "\nFatal error encountered during %s\n%s\n" "${event}" "${message}. Exiting."
 }
 
 # ensures we have the token to use the psh cli tool
