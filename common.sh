@@ -24,7 +24,8 @@ function checkForPSHToken() {
 # Ensures the psh cli tool is installed and available
 # @return bool exit status
 function ensureCliIsInstalled() {
-    which platform
+    #suppress the output
+    foo=$(which platform)
     result=$?
 
     if (( 0 != result )); then
