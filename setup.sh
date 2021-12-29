@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # bash <(curl -fsS https://raw.githubusercontent.com/gilzow/source-operations/main/test.sh) foobar
-# bash <(curl -fsS https://raw.githubusercontent.com/gilzow/source-operations/auto-pr/setup.sh) autoprsourceop
+# bash <(curl -fsS https://raw.githubusercontent.com/gilzow/source-operations/main/setup.sh) autoprsourceop
 # https://github.com/gilzow/source-operations.git
 
 gitSourceOps="https://github.com/gilzow/source-operations.git"
@@ -26,7 +26,7 @@ case ${perform} in
   autoprsourceop)
     printf "Beginning automated pull request after auto-update source operation..."
     # grab our sourceop-support file, source it, then fire off the main component
-    . "${dirSourceOps}/sourceops-support.sh"
+    . "${dirSourceOps}/sourceop-support.sh"
     # run the set up and source operation
     (trigger_source_op) || exit 1
 
