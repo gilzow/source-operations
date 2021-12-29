@@ -21,16 +21,19 @@ function trigger_source_op() {
     # We need to ensure we can operate on the targeted update branch, and once it's prepped, record its previous state
     # so we can set it back, if needed
     updateBranchPreviousStatus=$(prepareUpdateBranch "${updateBranch}" "${productionBranch}") || exit $?
-
+    printf "%s previous status was %s\n" "${updateBranch}" "${updateBranchPreviousStatus}"
     # Hey, we can finally run the source operation!
     (runSourceOperation "${sourceOpName}" "${updateBranch}") || exit $?
 
     # Now that we're done, let's restore the targeted update branch back to where it was before we touched it
     if [[ 'inactive' == "${updateBranchPreviousStatus}" ]]; then
+      printf "%s was inactive previously so we will deactivate it.\n" "${updateBranch}"
       deactivateUpdateBranch "${updateBranch}"
+    else
+      printf "%s was previously %s so we'll leave it alone.\n" "${updateBranch}" "${updateBranchPreviousStatus}"
     fi
 
-    printf "Auto update of %s complete.\n" "${updateBranch}"
+    printf "Auto update of %s environment complete.\n" "${updateBranch}"
 }
 
 # Gets the production branch name
@@ -41,7 +44,7 @@ function getProductionBranchName() {
   defaultBranch=$(platform environment:list --type production --pipe)
   result=$?
 
-  if ( 0 != result) || [ -z "${defaultBranch}" ]; then
+  if (( 0 != result )) || [[ -z "${defaultBranch}" ]]; then
     event="Retrieving production branch(es) from project"
     message="I was unable to retrieve a list of production type branches for this project. Please create a ticket and"
     message="${message} ask that it be assigned to the DevRel team."
