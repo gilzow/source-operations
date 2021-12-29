@@ -3,6 +3,8 @@
 # in case (or when) we convert this to another language, it may help to have the indicated return when it is different
 # from a boolean exit status
 
+#source our common functions
+. "common.sh"
 
 function trigger_source_op() {
     echo "Beginning set up to perform the update..."
@@ -29,17 +31,6 @@ function trigger_source_op() {
     fi
 
     echo "Auto update of ${updateBranch} complete."
-}
-
-# ensures we have the token to use the psh cli tool
-# @return bool
-function checkForPSHToken() {
-  if [[ -z ${PLATFORMSH_CLI_TOKEN+x} ]]; then
-    message="You will need to create an environmental variable 'PLATFORMSH_CLI_TOKEN' that contains a valid platform.sh "
-    message="${message} token before I can run platform.sh cli commands."
-    logFatalError "PSH Token Check" "${message}"
-    exit 1
-  fi
 }
 
 # Gets the production branch name
@@ -81,27 +72,6 @@ function getUpdateBranchName() {
 # @return string source operation name we want to run
 function getSourceOpName() {
   echo "${PSH_SOP_NAME:-auto-update}"
-}
-
-# Outputs the event and error message that was encountered during the process
-# @todo For now this just echos an error message, but might expand to include slack notices?
-# @return void
-function logFatalError() {
-  event="${1:-no event specificied}"
-  message="${2:-no message provided}"
-  printf "Fatal error encountered during %s\n%s" "${event}" "${message}. Exiting."
-}
-
-# Ensures the psh cli tool is installed and available
-# @return void
-function ensureCliIsInstalled() {
-    if which platform; then
-        echo "Cli is already installed"
-    else
-        # @todo should we follow up afterwards and make sure it installs correctly?
-        echo "Cli not installed, installing..."
-        curl -sS https://platform.sh/cli/installer | php
-    fi
 }
 
 # we need the update branch, and we need it to be synced with production
