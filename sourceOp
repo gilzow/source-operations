@@ -10,6 +10,8 @@ def main():
 
     if "autoupdate" == sys.argv[1]:
         autoupdatemain()
+    elif "hello" == sys.argv[1]:
+        print("Why hello there! I'm inside python!")
 
 
 if __name__ == '__main__':
