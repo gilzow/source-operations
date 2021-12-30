@@ -3,25 +3,51 @@
 # in case (or when) we convert this to another language, it may help to have the indicated return when it is different
 # from a boolean exit status
 
+# Saving these as we might want them to provide info back to the customer if createBranch or activateBranch fail
+# how many are we allowed to have
+#platform p:info subscription.environments
+# how many do we have active
+# platform e:list --type=development,staging --no-inactive --pipe
+
 #source our common functions
 . "${BASH_SOURCE%/*}/common.sh"
 
 function trigger_source_op() {
+    #default value, assume it was inactive until we know differently
+    updateBranchPreviousStatus='inactive'
+
     printf "Beginning set up to perform the update...\n"
     # Things we need in order to be able to perform the operation
     (checkForPSHToken) || exit $?
     (ensureCliIsInstalled) || exit $?
 
     # Items we'll be using to perform the operation. updateBranch and sourceOpName have defaults; only with the
-    # productionBranch we may encounter a fatal error
+    # productionBranch may we encounter a fatal error
     productionBranch=$(getProductionBranchName) || exit $?
     updateBranch=$(getUpdateBranchName) # we have a default so need to exit on this step
     sourceOpName=$(getSourceOpName) # same, we have a default
 
-    # We need to ensure we can operate on the targeted update branch, and once it's prepped, record its previous state
-    # so we can set it back, if needed
-    updateBranchPreviousStatus=$(prepareUpdateBranch "${updateBranch}" "${productionBranch}") || exit $?
-    printf "%s previous status was %s\n" "${updateBranch}" "${updateBranchPreviousStatus}"
+    # What action do we need to perform on the update branch? create it? activate it? Or is it ready to go?
+    updateBranchAction=$(determineBranchAction "${updateBranch}") || exit $?
+
+    if [[ "create" == "${updateBranchAction}" ]]; then
+      (createBranch "${updateBranch}" "${productionBranch}") || exit ${?}
+    else
+      if [[ "activate" == "${updateBranchAction}" ]]; then
+        (activateBranch "${updateBranch}") || exit $?
+      else
+        updateBranchPreviousStatus="active"
+      fi
+
+      #for all existing branch situations, we need to verify the parent and then sync
+      (validateUpdateBranchAncestory "${updateBranch}" "${productionBranch}") || exit $?
+      #now that we know it's active, let's sync
+      # Originally we were checking the `commits_behind` status of the branch and only doing a sync if it was behind,
+      # but if a branch is already up-to-date with its parent, then performing a sync command on it will simply return
+      # a success exit status. We dont need to do it on a create action because we KNOW it's already sync'ed
+      (syncBranch "${updateBranch}" "${productionBranch}") || exit $?
+    fi
+
     # Hey, we can finally run the source operation!
     (runSourceOperation "${sourceOpName}" "${updateBranch}") || exit $?
 
@@ -41,7 +67,7 @@ function trigger_source_op() {
 # https://platformsh.slack.com/archives/CEDK8KCSC/p1640717471389700
 # @return string|bool production branch name, or exit status of 1
 function getProductionBranchName() {
-  defaultBranch=$(platform environment:list --type production --pipe)
+  defaultBranch=$(platform environment:list --type production --pipe 2>/dev/null)
   result=$?
 
   if (( 0 != result )) || [[ -z "${defaultBranch}" ]]; then
@@ -80,41 +106,25 @@ function getSourceOpName() {
 # we need the update branch, and we need it to be synced with production
 # this could mean we need to create the branch, or sync the branch, or do nothing
 # @param string updateBranch name of branch we will target for updates
-# @param string productionBranch name of the branch used for the production environment
-# @return string|bool update branch status from before we touched it, or an exit status of 1
-function prepareUpdateBranch() {
+# @return string|bool the action we need to perform on the update branch, or an exit status of 1
+function determineBranchAction() {
     updateBranch="$1"
-    productionBranch="$2"
+    #default
+    action="sync"
 
-    # how many are we allowed to have
-    #platform p:info subscription.environments
-    # how many do we have active
-    # platform e:list --type=development,staging --no-inactive --pipe
     # kill two birds with one stone here: if it doesn't exist, then we'll get an error and know we need to create it. If
     # it exists, then we'll know if we need to sync it
-    updateBranchStatus=$(platform environment:info status -e "${updateBranch}")
+    updateBranchStatus=$(platform environment:info status -e "${updateBranch} 2>/dev/null")
     branchExists=$?
 
     if (( 0 != branchExists )); then
-      # we need to create the branch. Since we're creating it, we need to later deactivate it
-      updateBranchStatus='inactive'
-      (createBranch "${updateBranch}" "${productionBranch}") || exit $?
-    else
-      # we also need to make sure the update branch's parent is the same as production
-      (validateUpdateBranchAncestory "${updateBranch}" "${productionBranch}") || exit $?
-
-      # we have the branch but it needs to be synced. In order to be sync'ed it has to be active
-      if [[ 'inactive' == "${updateBranchStatus}" ]]; then
-        (activateBranch "${updateBranch}") || exit $?
-      fi
-      #now that we know it's active, let's sync
-      # Originally we were checking the `commits_behind` status of the branch and only doing a sync if it was behind,
-      # but if a branch is already up-to-date with its parent, then performing a sync command on it will simply return
-      # a true
-      (syncBranch "${updateBranch}" "${productionBranch}") || exit $?
+      # we need to create the branch since it doesnt exist
+      action="create"
+    elif [[ 'inactive' == "${updateBranchStatus}" ]]; then
+      action="activate"
     fi
 
-    echo "${updateBranchStatus}"
+    echo "${action}"
 }
 
 # Activates a branch
@@ -122,8 +132,8 @@ function prepareUpdateBranch() {
 # @return void
 function activateBranch() {
     ENV_NAME="$1"
-    #printf "Activating branch '%s'..." "${ENV_NAME}"
-    platform environment:activate "${ENV_NAME}" --wait --yes
+    printf "Activating branch '%s'..." "${ENV_NAME}"
+    platform environment:activate "${ENV_NAME}" --wait --yes 2>/dev/null
     result=$?
     if (( 0 != result )); then
       event="Failure activating branch ${ENV_NAME}"
@@ -132,7 +142,7 @@ function activateBranch() {
       logFatalError "${event}" "${message}"
       exit 1
     fi
-    #printf " Environment activated.\n"
+    printf " Environment activated.\n"
 }
 
 # Creates the update branch so we can run source operations against it
@@ -142,8 +152,8 @@ function activateBranch() {
 function createBranch() {
   updateBranch="${1}"
   productionBranch="${2}"
-  #printf "Creating environment %s..." "${updateBranch}"
-  platform e:branch "${updateBranch}" "${productionBranch}" --no-clone-parent --force
+  printf "Creating environment %s..." "${updateBranch}"
+  platform e:branch "${updateBranch}" "${productionBranch}" --no-clone-parent --force 2>/dev/null
   result=$?
   if (( 0 != result )); then
     event="Failure creating branch ${ENV_NAME}"
@@ -153,7 +163,7 @@ function createBranch() {
     exit 1
   fi
 
-  #printf " Environment created.\n"
+  printf " Environment created.\n"
 }
 
 # Make sure the update branch is a direct child of production
@@ -163,7 +173,7 @@ function createBranch() {
 function validateUpdateBranchAncestory() {
   updateBranch="${1}"
   productionBranch="${2}"
-  parent=$(platform environment:info parent -e "${updateBranch}")
+  parent=$(platform environment:info parent -e "${updateBranch}" 2>/dev/null)
 
   if [[ "${parent}" != "${productionBranch}" ]]; then
     event="Update Branch ${updateBranch} is not a direct descendant of ${productionBranch}"
@@ -183,9 +193,9 @@ function syncBranch() {
   updateBranch="${1}"
   productionBranch="${2}"
 
-  #printf "Syncing branch %s with %s..." "${updateBranch}" "${productionBranch}"
+  printf "Syncing branch %s with %s..." "${updateBranch}" "${productionBranch}"
 
-  platform sync -e "${updateBranch}" --yes --wait code
+  platform sync -e "${updateBranch}" --yes --wait code 2>/dev/null
   result=$?
   if (( 0 != result )); then
     event="Failed to sync environment ${updateBranch} with ${productionBranch}"
@@ -195,7 +205,7 @@ function syncBranch() {
     exit 1
   fi
 
-  #printf " Syncing complete.\n"
+  printf " Syncing complete.\n"
 }
 
 # Sets the environment back to inactive status (ie Deletes the *environment* but not the git branch)
@@ -205,7 +215,7 @@ function syncBranch() {
 function deactivateUpdateBranch() {
   updateBranch="${1}"
   printf "Deactivating environment %s\n" "${updateBranch}"
-  platform e:delete "${updateBranch}" --no-delete-branch --no-wait --yes
+  platform e:delete "${updateBranch}" --no-delete-branch --no-wait --yes 2>/dev/null
 }
 
 # Runs the named source operation against a target branch
@@ -216,7 +226,7 @@ function runSourceOperation() {
     SOURCEOP_NAME="$1"
     ENV_NAME="$2"
     printf "Running source operation '%s' on '%s'..." "${SOURCEOP_NAME}" "${ENV_NAME}"
-    if platform source-operation:run "${SOURCEOP_NAME}" --environment "${ENV_NAME}" --wait ; then
+    if platform source-operation:run "${SOURCEOP_NAME}" --environment "${ENV_NAME}" --wait 2>/dev/null; then
         printf " Source op finished!\n"
     else
         event="Running source operation ${SOURCEOP_NAME}"
