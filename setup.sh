@@ -20,6 +20,7 @@ else
   git -C "${dirSourceOps}" pull origin
 fi
 
+export PATH="${dirSourceOps}:${PATH}"
 
 perform=${1:-'nothing'}
 case ${perform} in
@@ -45,8 +46,8 @@ case ${perform} in
     printf "Complete. You can now test the updated branch.\n"
     ;;
 
-  nothing)
-    echo "You want me to do nothing"
+  hello)
+    sourceOp "${perform}"
     ;;
 
   *)
