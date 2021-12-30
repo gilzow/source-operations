@@ -8,7 +8,8 @@ tmpDir="/tmp"
 dirSourceOps="${tmpDir}/source-operations"
 
 #check and see if we already have the repo cloned in /tmp
-git -C "${dirSourceOps}" status
+# we dont really care what the status us other than does it exist, hence the 2>/dev/null
+git -C "${dirSourceOps}" status 2>/dev/null
 gitCheck=$?
 
 # we dont have the repo cloned so let's clone it
