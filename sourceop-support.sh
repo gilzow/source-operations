@@ -114,7 +114,7 @@ function determineBranchAction() {
 
     # kill two birds with one stone here: if it doesn't exist, then we'll get an error and know we need to create it. If
     # it exists, then we'll know if we need to sync it
-    updateBranchStatus=$(platform environment:info status -e "${updateBranch} 2>/dev/null")
+    updateBranchStatus=$(platform environment:info status -e "${updateBranch}" 2>/dev/null)
     branchExists=$?
 
     if (( 0 != branchExists )); then
