@@ -2,6 +2,7 @@
 import os
 import sys
 from autoupdate import main as autoupdatemain
+from cron_trigger_autoupdate import trigger_autoupdate
 
 
 def main():
@@ -12,6 +13,8 @@ def main():
         autoupdatemain()
     elif "hello" == sys.argv[1]:
         print("Why hello there! I'm inside python!")
+    elif "cron-sopupdate" == sys.argv[1]:
+        trigger_autoupdate()
 
 
 if __name__ == '__main__':
