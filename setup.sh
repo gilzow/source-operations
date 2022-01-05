@@ -10,18 +10,20 @@ tmpDir="/tmp"
 dirSourceOps="${tmpDir}/source-operations"
 
 #check and see if we already have the repo cloned in /tmp
-# we dont really care what the status us other than does it exist, hence the 2>/dev/null
-git -C "${dirSourceOps}" status 2>/dev/null
+# we dont really care what the status us other than does it exist, hence the &>/dev/null
+git -C "${dirSourceOps}" status &>/dev/null
 gitCheck=$?
 
 # we dont have the repo cloned so let's clone it
 if (( 0 != gitCheck )) || [[ ! -d "${dirSourceOps}" ]]; then
-  printf "Installing the source operations support tools...\n"
+  printf "Installing the source operations support tools..."
   git -C "${tmpDir}" clone --quiet "${gitSourceOps}"
+  printf " Done.\n"
 else
   # we have it so let's make sure we're up-to-date
   printf "Ensuring we have the latest version of the source operations support tools..."
   git -C "${dirSourceOps}" pull origin --quiet
+  printf " Done.\n"
 fi
 
 # Add our directory to PATH so we can call it

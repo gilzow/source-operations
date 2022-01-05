@@ -125,12 +125,12 @@ def trigger_autoupdate():
 
         # Now that we're done, let's restore the targeted update branch back to where it was before we touched it
         if "inactive" == updateBranchPreviousStatus:
-            logging.info("{} was inactive previously so we will deactivate it.".format(updateBranchName))
+            logging.info("{} branch was inactive previously so we will deactivate it.".format(updateBranchName))
             deactivateUpdateBranch(updateBranchName)
         else:
             logging.info("{} was previously active so we'll leave it alone.".format(updateBranchName))
 
-        logging.info("Auto update of {} environment complete.".format(updateBranchName))
+        logging.info("{}{}{}".format(CBOLD, "Auto update of {} environment complete.".format(updateBranchName), CRESET))
         return True
 
     def getGitIntPruneBranchProp(integrationID, updateBranchName):
