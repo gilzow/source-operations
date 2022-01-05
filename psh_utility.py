@@ -24,14 +24,14 @@ PSH_COMMON_MESSAGES = {
 }
 
 
-def runCommand(command, cwd=None):
+def runCommand(command, rcwd=None):
     """
     Runs a subprocess on the system. Mostly used to interact with psh cli and git
     :param string|list command: Command to be run as a string or as a list
-    :param string cwd: path to where we need the process to be run
+    :param string rcwd: path to where we need the process to be run
     :return: dict {result: boolean, message: strdout|stderr }
     """
-    procUpdate = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    procUpdate = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, cwd=rcwd)
     output, procerror = procUpdate.communicate()
 
     if 0 == procUpdate.returncode:
