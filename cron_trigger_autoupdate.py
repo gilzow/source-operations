@@ -120,6 +120,7 @@ def trigger_autoupdate():
 
         # Hey, we can finally run the source operation!
         if not runSourceOperations(sourceOpName, updateBranchName):
+            logging.info("Source op failed?")
             return False
 
         # Now that we're done, let's restore the targeted update branch back to where it was before we touched it
