@@ -253,7 +253,7 @@ def trigger_autoupdate():
         :return: bool
         """
         logging.info("Deactivating environment {}".format(targetEnvironment))
-        command = "platform e:delete {} --no-delete-branch --no-wait --yes 2>/dev/null"
+        command = "platform e:delete {} --no-delete-branch --no-wait --yes 2>/dev/null".format(targetEnvironment)
         deactivateRun = psh_utility.runCommand(command)
         if deactivateRun['result']:
             logging.info("Environment {} deactivated".format(targetEnvironment))
