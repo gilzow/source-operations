@@ -363,11 +363,13 @@ def trigger_autoupdate():
         command = "platform environment:info parent -e {} 2>/dev/null".format(updateBranchName)
         branchAncestoryRun = psh_utility.runCommand(command)
         if not branchAncestoryRun['result'] or productionBranchName != branchAncestoryRun['message']:
+            logging.info("prod branch is '{}' and is of type {}".format(productionBranchName, type(productionBranchName)))
+            logging.info("parent branch is '{}' and is of type {}".format(branchAncestoryRun['message'], type(branchAncestoryRun['message'])))  
             event = "Update Branch {} is not a direct descendant of {}".format(updateBranchName, productionBranchName)
-            message = "The targeted update branch, {}, is not a direct descendant of the production branch".format(
+            message = "The targeted update branch '{}', is not a direct descendant of the production branch".format(
                 updateBranchName)
-            message += " {}. The update branch's parent is {}. ".format(productionBranchName,
-                                                                        branchAncestoryRun['message'])
+            message += " '{}'. The update branch's parent is '{}'. ".format(productionBranchName,
+                                                                            branchAncestoryRun['message'])
             message += "This automated source operation only supports updating branches that are direct descendants "
             message += "of the production branch"
             return outputError(event, message)
