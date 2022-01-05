@@ -92,7 +92,7 @@ def trigger_autoupdate():
                     message += " Exiting."
                     return outputError(event, message)
                 else:
-                    message += " I have disable 'prune_branches' so I can create the branch and continue running "
+                    message = " I have disable 'prune_branches' so I can create the branch and continue running "
                     message += "updates. You will need to re-enable 'prune_branches' in your integration after you "
                     message += "manually push the branch '{}' to your remote git repository.".format(updateBranchName)
                     logging.info(message)
@@ -120,7 +120,6 @@ def trigger_autoupdate():
 
         # Hey, we can finally run the source operation!
         if not runSourceOperations(sourceOpName, updateBranchName):
-            logging.info("Source op failed?")
             return False
 
         # Now that we're done, let's restore the targeted update branch back to where it was before we touched it
@@ -276,6 +275,7 @@ def trigger_autoupdate():
 
         if sourceOpRun['result']:
             logging.info("Source operation completed.")
+            return True
         else:
             return outputError(command, sourceOpRun['message'])
 
