@@ -80,7 +80,7 @@ def main():
         logging.info("Seeing if there are any updates to commit.")
         procStatus = runCommand('git status --porcelain=1', appPath)
 
-        if not procStatus['message'] or updaters[dependencyFile]['lock'] not in output:
+        if not procStatus['message'] or updaters[dependencyFile]['lock'] not in procStatus['message']:
             logging.info("No updates available, nothing to commit. Exiting...")
             # no updates so nothing to add, not a failure, but we are done
             return True
