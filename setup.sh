@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-# bash <(curl -fsS https://raw.githubusercontent.com/gilzow/source-operations/main/test.sh) foobar
+# This wont work in dash because `<(` is a bashism
 # bash <(curl -fsS https://raw.githubusercontent.com/gilzow/source-operations/main/setup.sh) autoprsourceop
+# so you're going to have to do
+# bash -c "bash <(curl -fsS https://raw.githubusercontent.com/gilzow/source-operations/main/setup.sh) autoprsourceop"
 # https://github.com/gilzow/source-operations.git
 
 # Repo for our source ops support scripts
