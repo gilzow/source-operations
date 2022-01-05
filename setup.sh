@@ -16,10 +16,12 @@ gitCheck=$?
 
 # we dont have the repo cloned so let's clone it
 if (( 0 != gitCheck )) || [[ ! -d "${dirSourceOps}" ]]; then
-  git -C "${tmpDir}" clone "${gitSourceOps}"
+  printf "Installing the source operations support tools...\n"
+  git -C "${tmpDir}" clone --quiet "${gitSourceOps}"
 else
   # we have it so let's make sure we're up-to-date
-  git -C "${dirSourceOps}" pull origin
+  printf "Ensuring we have the latest version of the source operations support tools..."
+  git -C "${dirSourceOps}" pull origin --quiet
 fi
 
 # Add our directory to PATH so we can call it

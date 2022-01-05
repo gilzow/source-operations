@@ -7,7 +7,7 @@ import logging
 from logging import critical, error, info, warning, debug
 import psh_utility
 from psh_utility import PSH_COMMON_MESSAGES
-from psh_logging import outputError
+from psh_logging import outputError, CBOLD, CRESET, CWARN
 
 DEFAULT_UPDATE_BRANCH = "update"
 ENVVAR_UPDATE_BRANCH = "PSH_SOP_UPDATE_BRANCH"
@@ -47,7 +47,7 @@ def trigger_autoupdate():
                         PSH_COMMON_MESSAGES['psh_cli_token']['fail_message'])
             return False
         else:
-            logging.info(PSH_COMMON_MESSAGES['psh_cli_token']['success_message'])
+            logging.info('{}{}{}'.format(CBOLD, PSH_COMMON_MESSAGES['psh_cli_token']['success_message'], CRESET))
 
         # Is the psh cli installed?
         logging.info(PSH_COMMON_MESSAGES['psh_cli']['event'])
@@ -55,7 +55,7 @@ def trigger_autoupdate():
             outputError(PSH_COMMON_MESSAGES['psh_cli']['event'], PSH_COMMON_MESSAGES['psh_cli']['fail_message'])
             return False
         else:
-            logging.info(PSH_COMMON_MESSAGES['psh_cli']['success_message'])
+            logging.info('{}{}{}'.format(CBOLD, PSH_COMMON_MESSAGES['psh_cli']['success_message'], CRESET))
 
         # now we need to get our production branch name. updateBranch and sourceOpName have defaults; only with the
         # productionBranch may we encounter a fatal error
@@ -73,7 +73,7 @@ def trigger_autoupdate():
             # first we need to check the integration status and if prune_branches is enabled
             if integrationID != "" and getGitIntPruneBranchProp(integrationID, updateBranchName):
                 # we need to warn them
-                logging.warning("'prune_branches' enabled in git integration!")
+                logging.warning('{}{}{}'.format(CWARN, "'prune_branches' enabled in git integration!", CRESET))
                 message = "You have a git integration with this project. If I create the update branch '{}'".format(
                     updateBranchName)
                 message += " while 'prune_branches' is enabled, the integration will immediately attempt to delete it."
@@ -92,6 +92,7 @@ def trigger_autoupdate():
                     message += " Exiting."
                     return outputError(event, message)
                 else:
+                    logging.info('{}{}{}'.format(CBOLD,"'prune_branches' disabled", CRESET))
                     message = " I have disable 'prune_branches' so I can create the branch and continue running "
                     message += "updates. You will need to re-enable 'prune_branches' in your integration after you "
                     message += "manually push the branch '{}' to your remote git repository.".format(updateBranchName)
@@ -242,7 +243,7 @@ def trigger_autoupdate():
         command = "platform sync -e {} --yes --wait code 2>/dev/null".format(updateBranch)
         syncRun = psh_utility.runCommand(command)
         if syncRun['result']:
-            logging.info("Syncing complete.")
+            logging.info("{}{}{}".format(CBOLD, "Syncing complete.", CRESET))
         else:
             return outputError(command, syncRun['message'])
 
@@ -256,7 +257,7 @@ def trigger_autoupdate():
         command = "platform e:delete {} --no-delete-branch --no-wait --yes 2>/dev/null".format(targetEnvironment)
         deactivateRun = psh_utility.runCommand(command)
         if deactivateRun['result']:
-            logging.info("Environment {} deactivated".format(targetEnvironment))
+            logging.info("{}{}{}".format(CBOLD, "Environment {} deactivated".format(targetEnvironment), CRESET))
         else:
             return outputError(command, deactivateRun['message'])
 
@@ -274,7 +275,7 @@ def trigger_autoupdate():
         sourceOpRun = psh_utility.runCommand(command)
 
         if sourceOpRun['result']:
-            logging.info("Source operation completed.")
+            logging.info("{}{}{}".format(CBOLD, "Source operation completed.", CRESET))
             return True
         else:
             return outputError(command, sourceOpRun['message'])
@@ -329,7 +330,7 @@ def trigger_autoupdate():
             message += "check the activity log to see why activation failed"
             return outputError(event, message)
 
-        logging.info("Environment activated.")
+        logging.info("{}{}{}".format(CBOLD, "Environment activated.", CRESET))
         return True
 
     def createBranch(updateBranchName, productionBranchName):
@@ -350,7 +351,7 @@ def trigger_autoupdate():
             message += " Please check the activity log to see why creation failed"
             outputError(event, message)
         else:
-            logging.info("Environment created.")
+            logging.info("{}{}{}".format(CBOLD, "Environment created.", CRESET))
 
         return createBranchRun['result']
 
@@ -387,7 +388,7 @@ def trigger_autoupdate():
             message += "You will need to examine the logs to find out why"
             outputError(failedEvent, message)
         else:
-            logging.info("Syncing complete.")
+            logging.info("{}{}{}".format(CBOLD, "Syncing complete.", CRESET))
 
         return syncRun['result']
 
