@@ -1,4 +1,5 @@
 import logging
+import sys
 from logging import critical, error, info, warning, debug
 
 CWORKING = '\033[34;1m'
