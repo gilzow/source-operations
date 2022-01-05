@@ -75,7 +75,7 @@ def main():
         procUpdate = runCommand(updaters[dependencyFile]['command'], os.path.join(appPath, dependencyFilePath))
 
         if not procUpdate['result']:
-            return outputError(updaters[dependencyFile]['command'], error)
+            return outputError(updaters[dependencyFile]['command'], procUpdate['message'])
         # now let's see if we have updates
         logging.info("Seeing if there are any updates to commit.")
         procStatus = runCommand('git status --porcelain=1', appPath)
@@ -93,7 +93,7 @@ def main():
         procAdd = runCommand('git add {}'.format(lockFileLocation), appPath)
 
         if not procAdd['result']:
-            return outputError('git add', error)
+            return outputError('git add', procAdd['message'])
         else:
             gitCommitMsg += '\nAdded updated {}'.format(lockFileLocation)
             doCommit = True
@@ -103,7 +103,7 @@ def main():
         procCommit = runCommand(cmd, appPath)
 
         if not procCommit['result']:
-            return outputError('git commit', error)
+            return outputError('git commit', procCommit['message'])
         else:
             logging.info("Changes successfully committed.")
             return True
