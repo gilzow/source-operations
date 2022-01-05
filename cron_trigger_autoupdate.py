@@ -223,7 +223,7 @@ def trigger_autoupdate():
 
         # oh, we're not done yet. It's plausible that in the future, we may have more than one production branch
         # so split the return from the above by line break, and then let's see if we were given exactly one
-        prodEnvironments = prodBranchRun['message'].split('\n')
+        prodEnvironments = prodBranchRun['message'].splitlines()
         if 1 != len(prodEnvironments):
             message = "More than one production branch was returned. I was given the following branches:\n{}".format(
                 prodBranchRun['message'])
