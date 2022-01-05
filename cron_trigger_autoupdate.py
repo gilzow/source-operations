@@ -305,7 +305,7 @@ def trigger_autoupdate():
         command = "platform environment:info status -e {} 2>/dev/null".format(updateBranchName)
         branchStatusRun = psh_utility.runCommand(command)
 
-        if 0 != branchStatusRun['result']:
+        if not branchStatusRun['result']:
             action = 'create'
         elif 'inactive' == branchStatusRun['message']:
             action = 'activate'
