@@ -31,7 +31,7 @@ def runCommand(command, rcwd=None):
     :param string rcwd: path to where we need the process to be run
     :return: dict {result: boolean, message: strdout|stderr }
     """
-    procUpdate = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, cwd=rcwd)
+    procUpdate = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, cwd=rcwd)
     output, procerror = procUpdate.communicate()
 
     if 0 == procUpdate.returncode:
