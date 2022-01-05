@@ -3,7 +3,9 @@
 # bash <(curl -fsS https://raw.githubusercontent.com/gilzow/source-operations/main/setup.sh) autoprsourceop
 # https://github.com/gilzow/source-operations.git
 
+# Repo for our source ops support scripts
 gitSourceOps="https://github.com/gilzow/source-operations.git"
+# A writable location where we can store things
 tmpDir="/tmp"
 dirSourceOps="${tmpDir}/source-operations"
 
@@ -20,39 +22,7 @@ else
   git -C "${dirSourceOps}" pull origin
 fi
 
+# Add our directory to PATH so we can call it
 export PATH="${dirSourceOps}:${PATH}"
 
-perform=${1:-'nothing'}
-case ${perform} in
-
-  autoprsourceop)
-    printf "Beginning the automated pull request for auto-update source operation task...\n"
-    # grab our sourceop-support file, source it, then fire off the main component
-    . "${dirSourceOps}/sourceop-support.sh"
-    # run the set up and source operation
-    (trigger_source_op) || exit 1
-
-    #now we're ready to start the PR process
-    . "${dirSourceOps}/ghPR.sh"
-
-    ;;
-
-  autoupdatesourceop)
-    printf "Beginning automated source operation update process...\n"
-    # grab our sourceop-support file, source it, then fire off the main component
-    . "${dirSourceOps}/sourceop-support.sh"
-    # run the set up and source operation
-    (trigger_source_op) || exit 1
-    printf "Complete. You can now test the updated branch.\n"
-    ;;
-
-  hello)
-    sourceOp "${perform}"
-    ;;
-
-  *)
-    echo "I have no idea what you want me to do"
-    ;;
-esac
-
-# @todo maybe we should move
+sourceOp "${1:-'nothing'}"
