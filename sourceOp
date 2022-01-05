@@ -6,12 +6,12 @@ import sys
 def main():
     if 2 > len(sys.argv):
         return False
-    if "autoupdate" == sys.argv[1]:
+    if "sop-autoupdate" == sys.argv[1]:
         from autoupdate import main as autoupdatemain
         autoupdatemain()
     elif "hello" == sys.argv[1]:
         print("Why hello there! I'm inside python!")
-    elif "cron-sopupdate" == sys.argv[1]:
+    elif "trigger-sopupdate" == sys.argv[1]:
         from cron_trigger_autoupdate import trigger_autoupdate
         trigger_autoupdate()
 
