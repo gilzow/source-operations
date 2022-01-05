@@ -36,6 +36,9 @@ def runCommand(command, cwd=None):
 
     if 0 == procUpdate.returncode:
         returnStatement = True
+        # @todo Should we add a .strip() before we return the message?
+        #  there are numerous situations where the message contains trailing \n that cause issues later when attempting
+        #  to compare their contents (ie "branchname" == "branchname\n").
         message = output
     else:
         returnStatement = False

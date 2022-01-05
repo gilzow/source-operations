@@ -155,7 +155,7 @@ def trigger_autoupdate():
             # bail, cuz we can't do anything else
             return False
 
-        if integrationGetRun['message'] == "true":
+        if integrationGetRun['message'].strip() == "true":
             return True
         else:
             return False
@@ -216,7 +216,7 @@ def trigger_autoupdate():
         command = "platform environment:list --type production --pipe 2>/dev/null"
         event = "Retrieving production environments"
         prodBranchRun = psh_utility.runCommand(command)
-        if not prodBranchRun['result'] or "" == prodBranchRun['message']:
+        if not prodBranchRun['result'] or "" == prodBranchRun['message'].strip():
             message = "I was unable to retrieve a list of production type branches for this project. Please create a"
             message += " ticket and ask that it be assigned to the DevRel team.\n\n"
             return outputError(event, message)
@@ -307,7 +307,7 @@ def trigger_autoupdate():
 
         if not branchStatusRun['result']:
             action = 'create'
-        elif 'inactive' == branchStatusRun['message']:
+        elif 'inactive' == branchStatusRun['message'].strip():
             action = 'activate'
 
         return action
@@ -362,9 +362,7 @@ def trigger_autoupdate():
         """
         command = "platform environment:info parent -e {} 2>/dev/null".format(updateBranchName)
         branchAncestoryRun = psh_utility.runCommand(command)
-        if not branchAncestoryRun['result'] or productionBranchName != branchAncestoryRun['message']:
-            logging.info("prod branch is '{}' and is of type {}".format(productionBranchName, type(productionBranchName)))
-            logging.info("parent branch is '{}' and is of type {}".format(branchAncestoryRun['message'], type(branchAncestoryRun['message'])))  
+        if not branchAncestoryRun['result'] or productionBranchName != branchAncestoryRun['message'].strip():
             event = "Update Branch {} is not a direct descendant of {}".format(updateBranchName, productionBranchName)
             message = "The targeted update branch '{}', is not a direct descendant of the production branch".format(
                 updateBranchName)
