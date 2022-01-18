@@ -11,6 +11,7 @@ from psh_logging import outputError, CBOLD, CRESET, CWARN
 
 DEFAULT_UPDATE_BRANCH = "update"
 ENVVAR_UPDATE_BRANCH = "PSH_SOP_UPDATE_BRANCH"
+ENVVAR_PROJ_ID = 'PLATFORMSH_PROJECT_ID'
 
 
 def trigger_autoupdate():
@@ -57,6 +58,17 @@ def trigger_autoupdate():
         else:
             logging.info('{}{}{}'.format(CBOLD, PSH_COMMON_MESSAGES['psh_cli']['success_message'], CRESET))
 
+        # is the current directory already associated with a project?
+        if not isProjectAssociated():
+            if not (projectID := getProjectID()):
+                projectIDMsg = "It appears you are not running in a Platform.sh environment, and the environmental "
+                projectIDMsg += "variable '{}' is not set. Without this variable, I am unable ".format(ENVVAR_PROJ_ID)
+                projectIDMsg += "to create an association with the project you want to update. Please add this "
+                projectIDMsg += "environmental variable and try again"
+                return outputError("Unable to associate with a Project ID", projectIDMsg)
+            elif not associateWithProjectID(projectID):
+                return False
+
         # now we need to get our production branch name. updateBranch and sourceOpName have defaults; only with the
         # productionBranch may we encounter a fatal error
         if not (productionBranchName := getProductionBranchName()):
@@ -92,7 +104,7 @@ def trigger_autoupdate():
                     message += " Exiting."
                     return outputError(event, message)
                 else:
-                    logging.info('{}{}{}'.format(CBOLD,"'prune_branches' disabled", CRESET))
+                    logging.info('{}{}{}'.format(CBOLD, "'prune_branches' disabled", CRESET))
                     message = " I have disable 'prune_branches' so I can create the branch and continue running "
                     message += "updates. You will need to re-enable 'prune_branches' in your integration after you "
                     message += "manually push the branch '{}' to your remote git repository.".format(updateBranchName)
@@ -132,6 +144,25 @@ def trigger_autoupdate():
 
         logging.info("{}{}{}".format(CBOLD, "Auto update of {} environment complete.".format(updateBranchName), CRESET))
         return True
+
+    def associateWithProjectID(projectID):
+        """
+        Associates the working directory with a Platform.sh project
+        @todo I hate how almost all of these functions have a side affect of triggering the error output message. How
+        can we restructure this layout so the functions are pure?
+        
+        :param string projectID: ID of the project to associate
+        :return bool:
+        """
+        command = "platform project:set-remote {}".format(projectID)
+        associate = psh_utility.runCommand(command)
+        if not associate['result']:
+            event = "Setting up Platform association with ID '{}'".format(projectID)
+            message = "I was unable to set up a Platform.sh project association using ID '{}'. Please".format(projectID)
+            message += " see the following output: \n{}".format(associate['message'])
+            outputError(event,message)
+
+        return associate['result']
 
     def getGitIntPruneBranchProp(integrationID, updateBranchName):
         """
@@ -204,6 +235,17 @@ def trigger_autoupdate():
             return ""
 
         return integrationID
+
+    def isProjectAssociated():
+        """
+        Checks to see if the current directory is associated with a platform project.
+        When running in a psh environment, it will already be associated
+
+        :return: bool:
+        """
+        command = "platform project:info id --quiet 2>/dev/null"
+        projAssociated = psh_utility.runCommand(command)
+        return projAssociated['result']
 
     def getProductionBranchName():
         """
@@ -293,6 +335,13 @@ def trigger_autoupdate():
         :return: string: source operation name we want to run
         """
         return os.getenv(defaultSourceOpNameEnvVar, defaultSourceOpName)
+
+    def getProjectID():
+        """
+        Retrieves the Project ID as stored in the environmental var defined in @see ENVVAR_PROJ_ID
+        :return: string: Project ID
+        """
+        return os.getenv(ENVVAR_PROJ_ID, '')
 
     def determineBranchAction(updateBranchName):
         """
