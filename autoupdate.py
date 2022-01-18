@@ -1,10 +1,7 @@
 #!/usr/bin/env python
-from pprint import pprint
-import sys
-import os
 import logging
-from logging import critical, error, info, warning, debug
-import subprocess
+import os
+
 from psh_logging import outputError
 from psh_utility import runCommand
 

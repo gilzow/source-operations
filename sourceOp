@@ -9,8 +9,6 @@ def main():
     if "sop-autoupdate" == sys.argv[1]:
         from autoupdate import main as autoupdatemain
         autoupdatemain()
-    elif "hello" == sys.argv[1]:
-        print("Why hello there! I'm inside python!")
     elif "trigger-sopupdate" == sys.argv[1]:
         from cron_trigger_autoupdate import trigger_autoupdate
         trigger_autoupdate()
